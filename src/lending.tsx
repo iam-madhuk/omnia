@@ -65,7 +65,7 @@ const AILandingPage = () => {
       id: 1,
       name: "Alex Johnson",
       role: "CTO at TechCorp",
-      content: "This AI service transformed our workflow. We've seen a 40% increase in productivity since implementation.",
+      content: "This AI service has revolutionized our workflow, boosting our productivity by 40% since it was implemented.",
       avatar: "👨‍💼"
     },
     {
