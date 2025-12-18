@@ -1,5 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
+import { useAuth, UserProfile } from "./components/Login";
+import { Dashboard } from "./components/Dashboard";
+import { ProfileSettings } from "./components/ProfileSettings";
+import { ProfileSettingsTest } from "./components/ProfileSettings.test";
 
 import aiHead from "./assets/ai-head.png";
 interface CounterProps {
@@ -8,6 +12,17 @@ interface CounterProps {
 }
 
 const AILandingPage = () => {
+  // Auth context
+  const { isAuthenticated, setShowLogin } = useAuth();
+  
+  // Navigation state
+  const [currentView, setCurrentView] = useState<'landing' | 'dashboard' | 'profile'>('landing');
+  
+  console.log('Current view:', currentView, 'Is authenticated:', isAuthenticated);
+  
+  // Mobile menu state
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
   // Mouse glow effect
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   useEffect(() => {
@@ -25,6 +40,38 @@ const AILandingPage = () => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  // Listen for navigation events from UserProfile dropdown
+  useEffect(() => {
+    const handleNavigateToProfile = () => {
+      console.log('Navigating to profile view');
+      setCurrentView('profile');
+    };
+    const handleNavigateToDashboard = () => {
+      console.log('Navigating to dashboard view');
+      setCurrentView('dashboard');
+    };
+    
+    window.addEventListener('navigate-to-profile', handleNavigateToProfile);
+    window.addEventListener('navigate-to-dashboard', handleNavigateToDashboard);
+    
+    return () => {
+      window.removeEventListener('navigate-to-profile', handleNavigateToProfile);
+      window.removeEventListener('navigate-to-dashboard', handleNavigateToDashboard);
+    };
+  }, []);
+
+  // Navigation handler for UserProfile component
+  const handleNavigation = (view: string) => {
+    console.log('handleNavigation called with view:', view);
+    if (view === 'profile') {
+      console.log('Setting current view to profile');
+      setCurrentView('profile');
+    } else if (view === 'dashboard') {
+      console.log('Setting current view to dashboard');
+      setCurrentView('dashboard');
+    }
+  };
 
   // Animated counters
   const Counter = ({ target, duration = 2 }: CounterProps) => {
@@ -99,6 +146,63 @@ const AILandingPage = () => {
     }, 5000);
     return () => clearInterval(interval);
   }, [testimonials.length]);
+
+  // Handle different views based on navigation
+  if (isAuthenticated && currentView === 'dashboard') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-900 to-black text-white overflow-hidden relative">
+        {/* Navigation Bar */}
+        <motion.nav
+          initial={{ y: -50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.6 }}
+          className="fixed top-0 left-0 w-full flex justify-between items-center px-6 py-4 backdrop-blur-lg bg-black/20 border-b border-gray-800 z-40"
+        >
+          <button
+            onClick={() => setCurrentView('landing')}
+            className="text-2xl font-bold flex items-center cursor-pointer hover:opacity-80 transition"
+          >
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
+              <span className="font-bold text-xl">Robotix</span>
+            </div>
+          </button>
+          <UserProfile onNavigate={handleNavigation} />
+        </motion.nav>
+        <div className="pt-20">
+          <Dashboard />
+        </div>
+      </div>
+    );
+  }
+
+  if (isAuthenticated && currentView === 'profile') {
+    console.log('Rendering profile view');
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-900 to-black text-white overflow-hidden relative">
+        <motion.nav
+          initial={{ y: -50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.6 }}
+          className="fixed top-0 left-0 w-full flex justify-between items-center px-6 py-4 backdrop-blur-lg bg-black/20 border-b border-gray-800 z-40"
+        >
+          <button
+            onClick={() => setCurrentView('landing')}
+            className="text-2xl font-bold flex items-center cursor-pointer hover:opacity-80 transition"
+          >
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
+              <span className="font-bold text-xl">Robotix</span>
+            </div>
+          </button>
+          <UserProfile onNavigate={handleNavigation} />
+        </motion.nav>
+        <div className="pt-20">
+          <ProfileSettingsTest />
+        </div>
+      </div>
+    );
+  }
 
   // Hover tilt effect for cards
   const useTilt = (active: boolean) => {
@@ -187,9 +291,80 @@ const AILandingPage = () => {
             </a>
           ))}
         </div>
-        <button className="bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2 rounded-lg hover:opacity-90 transition">
-          Get Started
-        </button>
+        <div className="flex items-center space-x-4">
+          {isAuthenticated ? (
+            <UserProfile onNavigate={handleNavigation} />
+          ) : (
+            <>
+              <button 
+                onClick={() => setShowLogin(true)}
+                className="hidden md:block text-white hover:text-purple-300 transition-colors"
+              >
+                Login
+              </button>
+              <button 
+                onClick={() => setShowLogin(true)}
+                className="hidden md:block bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2 rounded-lg hover:opacity-90 transition"
+              >
+                Get Started
+              </button>
+            </>
+          )}
+          {/* Mobile menu button */}
+          <button 
+            className="md:hidden text-white focus:outline-none"
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+        </div>
+
+        {/* Mobile menu */}
+        {mobileMenuOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="absolute top-full left-0 w-full bg-black/95 backdrop-blur-lg border-t border-gray-800 md:hidden"
+          >
+            <div className="px-6 py-4 space-y-4">
+              {["Features", "Demo", "Pricing", "Testimonials", "Contact"].map((item) => (
+                <a
+                  key={item}
+                  href={`#${item.toLowerCase()}`}
+                  className="block text-white hover:text-purple-300 transition"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item}
+                </a>
+              ))}
+              {!isAuthenticated && (
+                <div className="pt-4 space-y-2">
+                  <button 
+                    onClick={() => {
+                      setShowLogin(true);
+                      setMobileMenuOpen(false);
+                    }}
+                    className="block w-full text-left text-white hover:text-purple-300 transition-colors"
+                  >
+                    Login
+                  </button>
+                  <button 
+                    onClick={() => {
+                      setShowLogin(true);
+                      setMobileMenuOpen(false);
+                    }}
+                    className="block w-full bg-gradient-to-r from-purple-500 to-pink-500 px-4 py-2 rounded-lg hover:opacity-90 transition text-center"
+                  >
+                    Get Started
+                  </button>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        )}
       </motion.nav>
 
       {/* Hero Section */}
@@ -209,8 +384,17 @@ const AILandingPage = () => {
             Whether you’re automating tasks or unlocking new creative opportunities – we make AI work for you.
           </p>
           <div className="flex gap-4 mt-6">
-            <button className="bg-blue-600 hover:bg-blue-700 rounded-full px-6 py-3 font-semibold">
-              🚀 Get Started
+            <button 
+              onClick={() => {
+                if (isAuthenticated) {
+                  setCurrentView('dashboard');
+                } else {
+                  setShowLogin(true);
+                }
+              }}
+              className="bg-blue-600 hover:bg-blue-700 rounded-full px-6 py-3 font-semibold"
+            >
+              🚀 {isAuthenticated ? 'Go to AI Hub' : 'Get Started'}
             </button>
             <button className="border border-gray-500 rounded-full px-6 py-3 text-white hover:bg-gray-800">
               ▶ Watch Demo
@@ -294,6 +478,9 @@ const AILandingPage = () => {
         </div>
       </section>
 
+      {/* Dashboard Section - Only show if authenticated */}
+      {isAuthenticated && <div id="dashboard"><Dashboard /></div>}
+
       {/* Features Section */}
       <section id="features" className="py-24 px-12 bg-[#0a0f1c] relative">
         <h2 className="text-4xl font-bold text-center mb-16">
@@ -336,8 +523,11 @@ const AILandingPage = () => {
           viewport={{ once: true }}
         >
           <p className="text-gray-300 mb-4">Experience our AI tools in action.</p>
-          <button className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 rounded-full hover:opacity-80">
-            Try Demo
+          <button 
+            onClick={() => isAuthenticated ? alert('Demo launched!') : setShowLogin(true)}
+            className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 rounded-full hover:opacity-80"
+          >
+            {isAuthenticated ? 'Launch Demo' : 'Try Demo'}
           </button>
         </motion.div>
       </section>
@@ -406,8 +596,11 @@ const AILandingPage = () => {
                   <li>✔ Feature Two</li>
                   <li>✔ Feature Three</li>
                 </ul>
-                <button className="bg-gradient-to-r from-purple-500 to-pink-500 px-6 py-3 rounded-full hover:opacity-80">
-                  Choose Plan
+                <button 
+                  onClick={() => isAuthenticated ? alert(`Selected ${plan} plan!`) : setShowLogin(true)}
+                  className="bg-gradient-to-r from-purple-500 to-pink-500 px-6 py-3 rounded-full hover:opacity-80"
+                >
+                  {isAuthenticated ? 'Upgrade Plan' : 'Choose Plan'}
                 </button>
               </motion.div>
             );
@@ -428,8 +621,11 @@ const AILandingPage = () => {
         >
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Transform Your Business?</h2>
           <p className="text-gray-100 mb-8">Join thousands of companies using our AI solutions to drive growth and innovation.</p>
-          <button className="bg-white text-purple-600 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition">
-            Get Started Now
+          <button 
+            onClick={() => isAuthenticated ? window.location.href = '#contact' : setShowLogin(true)}
+            className="bg-white text-purple-600 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition"
+          >
+            {isAuthenticated ? 'Contact Sales' : 'Get Started Now'}
           </button>
         </motion.div>
       </section>
