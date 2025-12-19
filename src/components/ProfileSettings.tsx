@@ -6,8 +6,7 @@ export const ProfileSettings = () => {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'profile' | 'security' | 'preferences' | 'billing'>('profile');
 
-  // Debug logging
-  console.log('ProfileSettings rendered, user:', user);
+
   const [isEditing, setIsEditing] = useState(false);
   const [profileData, setProfileData] = useState({
     name: user?.name || '',
@@ -63,11 +62,21 @@ export const ProfileSettings = () => {
   };
 
   if (!user) {
-    console.log('ProfileSettings: No user found, returning null');
-    return null;
+    return (
+      <div className="max-w-6xl mx-auto p-6">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-white mb-2">Please Log In</h1>
+          <p className="text-gray-400">You need to be logged in to access profile settings.</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+          >
+            Refresh Page
+          </button>
+        </div>
+      </div>
+    );
   }
-
-  console.log('ProfileSettings: Rendering with user:', user.name);
 
   return (
     <div className="max-w-6xl mx-auto p-6">

@@ -1,27 +1,62 @@
 import { useState, useEffect, useRef } from "react";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { useAuth, UserProfile } from "./components/Login";
 import { Dashboard } from "./components/Dashboard";
 import { ProfileSettings } from "./components/ProfileSettings";
-import { ProfileSettingsTest } from "./components/ProfileSettings.test";
 
 import aiHead from "./assets/ai-head.png";
+
 interface CounterProps {
   target: number;
   duration?: number;
 }
 
+// Move Counter component outside to avoid hooks issues
+const Counter = ({ target, duration = 2 }: CounterProps) => {
+  const [count, setCount] = useState(0);
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          let startTime: number | null = null;
+          const animateCount = (timestamp: number) => {
+            if (!startTime) startTime = timestamp;
+            const progress = Math.min((timestamp - startTime) / (duration * 1000), 1);
+            setCount(Math.floor(progress * target));
+            if (progress < 1) {
+              requestAnimationFrame(animateCount);
+            }
+          };
+          requestAnimationFrame(animateCount);
+        }
+      },
+      { threshold: 0.5 }
+    );
+
+    if (ref.current) {
+      observer.observe(ref.current);
+    }
+
+    return () => observer.disconnect();
+  }, [target, duration]);
+
+  return <span ref={ref}>{count}</span>;
+};
+
 const AILandingPage = () => {
   // Auth context
-  const { isAuthenticated, setShowLogin } = useAuth();
+  const { isAuthenticated, setShowLogin, user } = useAuth();
   
   // Navigation state
   const [currentView, setCurrentView] = useState<'landing' | 'dashboard' | 'profile'>('landing');
   
-  console.log('Current view:', currentView, 'Is authenticated:', isAuthenticated);
-  
   // Mobile menu state
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // Video modal state
+  const [showVideoModal, setShowVideoModal] = useState(false);
   
   // Mouse glow effect
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -41,14 +76,19 @@ const AILandingPage = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Listen for navigation events from UserProfile dropdown
+  // Reset navigation when authentication changes
+  useEffect(() => {
+    if (isAuthenticated) {
+      setCurrentView('dashboard');
+    } else {
+      setCurrentView('landing');
+    }
+  }, [isAuthenticated]);
   useEffect(() => {
     const handleNavigateToProfile = () => {
-      console.log('Navigating to profile view');
       setCurrentView('profile');
     };
     const handleNavigateToDashboard = () => {
-      console.log('Navigating to dashboard view');
       setCurrentView('dashboard');
     };
     
@@ -63,49 +103,14 @@ const AILandingPage = () => {
 
   // Navigation handler for UserProfile component
   const handleNavigation = (view: string) => {
-    console.log('handleNavigation called with view:', view);
     if (view === 'profile') {
-      console.log('Setting current view to profile');
       setCurrentView('profile');
     } else if (view === 'dashboard') {
-      console.log('Setting current view to dashboard');
       setCurrentView('dashboard');
     }
   };
 
-  // Animated counters
-  const Counter = ({ target, duration = 2 }: CounterProps) => {
-    const [count, setCount] = useState(0);
-    const ref = useRef<HTMLSpanElement>(null);
 
-    useEffect(() => {
-      const observer = new IntersectionObserver(
-        ([entry]) => {
-          if (entry.isIntersecting) {
-            let startTime: number | null = null;
-            const animateCount = (timestamp: number) => {
-              if (!startTime) startTime = timestamp;
-              const progress = Math.min((timestamp - startTime) / (duration * 1000), 1);
-              setCount(Math.floor(progress * target));
-              if (progress < 1) {
-                requestAnimationFrame(animateCount);
-              }
-            };
-            requestAnimationFrame(animateCount);
-          }
-        },
-        { threshold: 0.5 }
-      );
-
-      if (ref.current) {
-        observer.observe(ref.current);
-      }
-
-      return () => observer.disconnect();
-    }, [target, duration]);
-
-    return <span ref={ref}>{count}+</span>;
-  };
   // Testimonials slider
   const testimonials = [
     {
@@ -147,63 +152,6 @@ const AILandingPage = () => {
     return () => clearInterval(interval);
   }, [testimonials.length]);
 
-  // Handle different views based on navigation
-  if (isAuthenticated && currentView === 'dashboard') {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-900 to-black text-white overflow-hidden relative">
-        {/* Navigation Bar */}
-        <motion.nav
-          initial={{ y: -50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.6 }}
-          className="fixed top-0 left-0 w-full flex justify-between items-center px-6 py-4 backdrop-blur-lg bg-black/20 border-b border-gray-800 z-40"
-        >
-          <button
-            onClick={() => setCurrentView('landing')}
-            className="text-2xl font-bold flex items-center cursor-pointer hover:opacity-80 transition"
-          >
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
-              <span className="font-bold text-xl">Robotix</span>
-            </div>
-          </button>
-          <UserProfile onNavigate={handleNavigation} />
-        </motion.nav>
-        <div className="pt-20">
-          <Dashboard />
-        </div>
-      </div>
-    );
-  }
-
-  if (isAuthenticated && currentView === 'profile') {
-    console.log('Rendering profile view');
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-900 to-black text-white overflow-hidden relative">
-        <motion.nav
-          initial={{ y: -50, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          transition={{ duration: 0.6 }}
-          className="fixed top-0 left-0 w-full flex justify-between items-center px-6 py-4 backdrop-blur-lg bg-black/20 border-b border-gray-800 z-40"
-        >
-          <button
-            onClick={() => setCurrentView('landing')}
-            className="text-2xl font-bold flex items-center cursor-pointer hover:opacity-80 transition"
-          >
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
-              <span className="font-bold text-xl">Robotix</span>
-            </div>
-          </button>
-          <UserProfile onNavigate={handleNavigation} />
-        </motion.nav>
-        <div className="pt-20">
-          <ProfileSettingsTest />
-        </div>
-      </div>
-    );
-  }
-
   // Hover tilt effect for cards
   const useTilt = (active: boolean) => {
     const ref = useRef<HTMLDivElement>(null);
@@ -242,6 +190,48 @@ const AILandingPage = () => {
 
     return ref;
   };
+
+  // Handle different views based on navigation - MOVED TO END TO FIX HOOKS ISSUE
+  if (isAuthenticated && currentView === 'dashboard') {
+    return <Dashboard />;
+  }
+
+  if (isAuthenticated && currentView === 'profile') {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-900 to-black text-white overflow-hidden relative">
+        <motion.nav
+          initial={{ y: -50, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ duration: 0.6 }}
+          className="fixed top-0 left-0 w-full flex justify-between items-center px-6 py-4 backdrop-blur-lg bg-black/20 border-b border-gray-800 z-40"
+        >
+          <button
+            onClick={() => setCurrentView('landing')}
+            className="text-2xl font-bold flex items-center cursor-pointer hover:opacity-80 transition"
+          >
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"></div>
+              <span className="font-bold text-xl">Robotix</span>
+            </div>
+          </button>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setCurrentView('dashboard')}
+              className="text-gray-300 hover:text-white transition"
+            >
+              Dashboard
+            </button>
+            <UserProfile onNavigate={handleNavigation} />
+          </div>
+        </motion.nav>
+        <div className="pt-20">
+          <ProfileSettings />
+        </div>
+      </div>
+    );
+  }
+
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-900 to-black text-white overflow-hidden relative scroll-smooth">
       {/* Animated gradient background orbs with parallax */}
@@ -368,23 +358,41 @@ const AILandingPage = () => {
       </motion.nav>
 
       {/* Hero Section */}
-      <section className="bg-[#0a0f1c] w-full text-white min-h-screen flex justify-between items-center px-12 relative p-8">
+      <section className="bg-[#0a0f1c] w-full text-white min-h-screen flex justify-between items-center px-12 relative p-8 pt-24">
         {/* Left Side Content */}
         <div className="flex max-w-xl flex-col space-y-6 relative">
-          <h1 className="text-5xl font-extrabold leading-snug">
-            Specialized <br />
-            <span className="bg-gradient-to-r from-purple-500 to-blue-400 text-transparent bg-clip-text">
-              Artificial Intelligence
+          <h1 className="text-6xl font-bold leading-tight">
+            <span className="bg-gradient-to-r from-blue-500 to-purple-500 text-transparent bg-clip-text">
+              Robotix
             </span>
             <br />
-            Design service
+            <span className="text-white">
+              AI Platform
+            </span>
           </h1>
-          <p className="text-gray-300 text-lg">
-            Build smarter, faster, and more scalable solutions with tailored AI models.
-            Whether you’re automating tasks or unlocking new creative opportunities – we make AI work for you.
-          </p>
-          <div className="flex gap-4 mt-6">
-            <button 
+          <motion.p 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="text-gray-300 text-xl leading-relaxed"
+          >
+            Experience the future of AI with our revolutionary platform that combines{' '}
+            <motion.span
+              className="text-blue-400 font-semibold"
+              animate={{ opacity: [0.7, 1, 0.7] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              15+ AI models
+            </motion.span>{' '}
+            under one unified interface. Build, create, and innovate faster than ever before.
+          </motion.p>
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.7 }}
+            className="flex gap-4 mt-8"
+          >
+            <motion.button 
               onClick={() => {
                 if (isAuthenticated) {
                   setCurrentView('dashboard');
@@ -392,18 +400,72 @@ const AILandingPage = () => {
                   setShowLogin(true);
                 }
               }}
-              className="bg-blue-600 hover:bg-blue-700 rounded-full px-6 py-3 font-semibold"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="relative bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 rounded-2xl px-8 py-4 font-bold text-lg shadow-2xl overflow-hidden group"
             >
-              🚀 {isAuthenticated ? 'Go to AI Hub' : 'Get Started'}
-            </button>
-            <button className="border border-gray-500 rounded-full px-6 py-3 text-white hover:bg-gray-800">
-              ▶ Watch Demo
-            </button>
-          </div>
-          <div className="mt-6 text-gray-400 text-sm flex gap-6 items-center">
-            <span>⭐ Trusted by 5000+ users</span>
-            <span>⚡ 40% productivity boost</span>
-          </div>
+              <div className="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+              <span className="relative flex items-center gap-2">
+                Start Now
+                <motion.span
+                  animate={{ x: [0, 5, 0] }}
+                  transition={{ duration: 1.5, repeat: Infinity }}
+                >
+                  →
+                </motion.span>
+              </span>
+            </motion.button>
+            <motion.button 
+              onClick={() => {
+                setShowVideoModal(true);
+                setTimeout(() => {
+                  document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' });
+                }, 500);
+              }}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="border-2 border-gradient-to-r border-gray-500 hover:border-blue-400 rounded-2xl px-8 py-4 text-white hover:bg-gray-800/50 font-semibold text-lg backdrop-blur-sm transition-all duration-300 flex items-center gap-2"
+            >
+              <motion.span
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                ▶
+              </motion.span>
+              Watch Magic
+            </motion.button>
+          </motion.div>
+          {/* Enhanced Stats */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.9 }}
+            className="mt-8 grid grid-cols-3 gap-6 text-center"
+          >
+            {[
+              { icon: "⭐", value: "10K+", label: "Active Users" },
+              { icon: "⚡", value: "500%", label: "Speed Boost" },
+              { icon: "🤖", value: "15+", label: "AI Models" }
+            ].map((stat, i) => (
+              <motion.div
+                key={i}
+                className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl p-4 backdrop-blur-sm border border-gray-700/50"
+                whileHover={{ scale: 1.05, y: -2 }}
+                animate={{ 
+                  boxShadow: [
+                    '0 0 20px rgba(59, 130, 246, 0.3)',
+                    '0 0 30px rgba(147, 51, 234, 0.4)',
+                    '0 0 20px rgba(59, 130, 246, 0.3)'
+                  ]
+                }}
+                transition={{ duration: 3, repeat: Infinity, delay: i * 0.5 }}
+              >
+                <div className="text-2xl mb-1">{stat.icon}</div>
+                <div className="text-xl font-bold text-blue-400">{stat.value}</div>
+                <div className="text-sm text-gray-400">{stat.label}</div>
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
 
         {/* Right Side (AI Image + Floating Cards) with parallax */}
@@ -488,10 +550,10 @@ const AILandingPage = () => {
         </h2>
         <div className="grid md:grid-cols-3 gap-8">
           {["Automation", "AI Insights", "Custom Solutions"].map((feature, i) => {
-            const ref = useTilt(true);
+            // const ref = useTilt(true); // Temporarily disabled
             return (
               <motion.div
-                ref={ref}
+                // ref={ref} // Temporarily disabled
                 key={feature}
                 initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -511,25 +573,173 @@ const AILandingPage = () => {
       </section>
 
       {/* Demo Section */}
-      <section id="demo" className="py-24 px-12 bg-[#0d1220] relative text-center">
-        <h2 className="text-4xl font-bold mb-8">
-          Live <span className="bg-gradient-to-r from-purple-500 to-blue-400 text-transparent bg-clip-text">Demo</span>
-        </h2>
-        <motion.div
-          className="mx-auto max-w-3xl bg-black/40 rounded-2xl shadow-xl p-8"
-          initial={{ opacity: 0, scale: 0.9 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.8 }}
-          viewport={{ once: true }}
-        >
-          <p className="text-gray-300 mb-4">Experience our AI tools in action.</p>
-          <button 
-            onClick={() => isAuthenticated ? alert('Demo launched!') : setShowLogin(true)}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 rounded-full hover:opacity-80"
-          >
-            {isAuthenticated ? 'Launch Demo' : 'Try Demo'}
-          </button>
-        </motion.div>
+      <section id="demo" className="py-24 px-12 bg-[#0d1220] relative">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-16">
+            <h2 className="text-5xl font-bold mb-6">
+              Live <span className="bg-gradient-to-r from-purple-500 to-blue-400 text-transparent bg-clip-text">Demo</span>
+            </h2>
+            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+              See the magic happen in real-time. Experience the power of 15+ AI models working together seamlessly.
+            </p>
+          </div>
+          
+          <div className="grid md:grid-cols-2 gap-8 mb-12">
+            {/* Demo Preview */}
+            <motion.div
+              className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-2xl p-8 border border-gray-700/50"
+              initial={{ opacity: 0, x: -50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+            >
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+              </div>
+              <div className="bg-black/50 rounded-xl p-6 min-h-[200px] flex flex-col justify-center">
+                <div className="text-green-400 text-sm font-mono mb-2">$ robotix generate --model gpt-4</div>
+                <div className="text-gray-300 text-sm leading-relaxed">
+                  <div className="mb-2">🤖 Analyzing request...</div>
+                  <div className="mb-2">⚡ Processing with GPT-4 Turbo...</div>
+                  <div className="mb-2">✨ Generating creative content...</div>
+                  <div className="text-blue-400">🚀 Ready! Your AI response is complete.</div>
+                </div>
+              </div>
+            </motion.div>
+            
+            {/* Feature Highlights */}
+            <motion.div
+              className="space-y-6"
+              initial={{ opacity: 0, x: 50 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              viewport={{ once: true }}
+            >
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-xl">🚀</span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white mb-2">Lightning Fast</h3>
+                  <p className="text-gray-400">Get responses in under 2 seconds with our optimized AI routing</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-xl">🎯</span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white mb-2">Smart Routing</h3>
+                  <p className="text-gray-400">Automatically selects the best AI model for your specific task</p>
+                </div>
+              </div>
+              
+              <div className="flex items-start gap-4">
+                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center flex-shrink-0">
+                  <span className="text-xl">💡</span>
+                </div>
+                <div>
+                  <h3 className="text-xl font-bold text-white mb-2">15+ AI Models</h3>
+                  <p className="text-gray-400">GPT-4, Claude, Gemini, and more - all in one platform</p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+          
+          {/* CTA Buttons */}
+          <div className="relative">
+            {/* Background decorative elements */}
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 via-blue-500/10 to-cyan-500/10 rounded-3xl blur-xl"></div>
+            
+            {/* Stats grid */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8 relative">
+              <div className="text-center p-4 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-xl border border-blue-500/30">
+                <div className="text-3xl font-bold text-blue-400">15+</div>
+                <div className="text-sm text-gray-400">AI Models</div>
+              </div>
+              <div className="text-center p-4 bg-gradient-to-br from-green-500/20 to-blue-500/20 rounded-xl border border-green-500/30">
+                <div className="text-3xl font-bold text-green-400">2.3s</div>
+                <div className="text-sm text-gray-400">Avg Response</div>
+              </div>
+              <div className="text-center p-4 bg-gradient-to-br from-purple-500/20 to-pink-500/20 rounded-xl border border-purple-500/30">
+                <div className="text-3xl font-bold text-purple-400">10K+</div>
+                <div className="text-sm text-gray-400">Happy Users</div>
+              </div>
+              <div className="text-center p-4 bg-gradient-to-br from-yellow-500/20 to-orange-500/20 rounded-xl border border-yellow-500/30">
+                <div className="text-3xl font-bold text-yellow-400">99.9%</div>
+                <div className="text-sm text-gray-400">Uptime</div>
+              </div>
+            </div>
+            
+            {/* Main CTA area */}
+            <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-3xl p-8 border border-gray-700/50 backdrop-blur-sm relative">
+              {/* Floating particles */}
+              <div className="absolute top-4 left-4 w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+              <div className="absolute top-8 right-8 w-1 h-1 bg-purple-400 rounded-full animate-bounce"></div>
+              <div className="absolute bottom-4 left-8 w-1.5 h-1.5 bg-cyan-400 rounded-full animate-pulse"></div>
+              
+              <div className="text-center mb-6">
+                <h3 className="text-2xl font-bold text-white mb-3">Ready to Transform Your Workflow?</h3>
+                <p className="text-gray-300 text-lg">Experience the future of AI development today</p>
+              </div>
+              
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
+                <button 
+                  onClick={() => isAuthenticated ? setCurrentView('dashboard') : setShowLogin(true)}
+                  className="relative bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 px-8 py-4 rounded-2xl font-bold text-lg shadow-2xl transition-all duration-300 group overflow-hidden"
+                >
+                  <div className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  <span className="relative flex items-center gap-2">
+                    {isAuthenticated ? 'Launch AI Hub' : 'Start Free Demo'}
+                    <div className="w-2 h-2 bg-white rounded-full animate-ping"></div>
+                  </span>
+                </button>
+                <button 
+                  onClick={() => alert('📚 Documentation: Visit docs.robotix.ai for API guides, tutorials, and examples!')}
+                  className="border-2 border-gray-500 hover:border-blue-400 px-8 py-4 rounded-2xl text-white hover:bg-gray-800/50 font-semibold transition-all duration-300 flex items-center gap-2"
+                >
+                  📖 View Documentation
+                  <span className="text-xs bg-blue-500 text-white px-2 py-1 rounded-full">NEW</span>
+                </button>
+              </div>
+              
+              {/* Trust indicators with icons */}
+              <div className="flex flex-wrap justify-center items-center gap-6 text-sm text-gray-400">
+                <div className="flex items-center gap-2">
+                  <span className="text-green-400">✓</span>
+                  No credit card required
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-green-400">⚡</span>
+                  Instant access
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-yellow-400">⭐</span>
+                  1000+ satisfied users
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-blue-400">🔒</span>
+                  Enterprise secure
+                </div>
+              </div>
+              
+              {/* Social proof badges */}
+              <div className="flex justify-center items-center gap-4 mt-6 pt-6 border-t border-gray-700">
+                <div className="flex items-center gap-2 text-sm text-gray-400">
+                  <div className="flex -space-x-2">
+                    <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full border-2 border-gray-800"></div>
+                    <div className="w-8 h-8 bg-gradient-to-r from-green-500 to-blue-500 rounded-full border-2 border-gray-800"></div>
+                    <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full border-2 border-gray-800"></div>
+                  </div>
+                  <span>Joined by developers from top companies</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </section>
 
       {/* Testimonials Section */}
@@ -577,10 +787,10 @@ const AILandingPage = () => {
         <h2 className="text-4xl font-bold text-center mb-16">Pricing Plans</h2>
         <div className="grid md:grid-cols-3 gap-8">
           {["Basic", "Pro", "Enterprise"].map((plan, i) => {
-            const ref = useTilt(true);
+            // const ref = useTilt(true); // Temporarily disabled
             return (
               <motion.div
-                ref={ref}
+                // ref={ref} // Temporarily disabled
                 key={plan}
                 initial={{ opacity: 0, y: 50 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -622,7 +832,7 @@ const AILandingPage = () => {
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Ready to Transform Your Business?</h2>
           <p className="text-gray-100 mb-8">Join thousands of companies using our AI solutions to drive growth and innovation.</p>
           <button 
-            onClick={() => isAuthenticated ? window.location.href = '#contact' : setShowLogin(true)}
+            onClick={() => alert('📧 Contact Us:\n\nEmail: support@robotix.ai\nDiscord: discord.gg/robotix\nTwitter: @RobotixAI\n\nWe\'d love to hear from you!')}
             className="bg-white text-purple-600 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition"
           >
             {isAuthenticated ? 'Contact Sales' : 'Get Started Now'}
@@ -662,6 +872,54 @@ const AILandingPage = () => {
           </button>
         </motion.form>
       </section>
+
+      {/* Video Modal */}
+      <AnimatePresence>
+        {showVideoModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setShowVideoModal(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.5, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.5, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="bg-gray-900 rounded-2xl overflow-hidden max-w-4xl w-full max-h-[80vh] relative"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Close Button */}
+              <button
+                onClick={() => setShowVideoModal(false)}
+                className="absolute top-4 right-4 z-10 w-10 h-10 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center text-white transition-colors"
+              >
+                ✕
+              </button>
+              
+              {/* Video Container */}
+              <div className="relative w-full" style={{ paddingBottom: '56.25%' /* 16:9 aspect ratio */ }}>
+                <iframe
+                  className="absolute inset-0 w-full h-full"
+                  src="https://www.youtube.com/embed/sFe0RFkNU7I?autoplay=1&rel=0&modestbranding=1"
+                  title="Robotix AI Demo Video"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                />
+              </div>
+              
+              {/* Video Info */}
+              <div className="p-6">
+                <h3 className="text-xl font-bold text-white mb-2">Robotix AI Platform Demo</h3>
+                <p className="text-gray-400">See how our multi-AI platform transforms your workflow</p>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Footer */}
       <footer className="bg-black/30 py-6 text-center text-gray-500 text-sm">

@@ -76,52 +76,59 @@ console.log(data.choices[0].message.content);`;
   ];
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-12">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold text-white mb-4">
-          AI Router <span className="bg-gradient-to-r from-purple-500 to-blue-400 text-transparent bg-clip-text">Documentation</span>
-        </h1>
-        <p className="text-xl text-gray-400 max-w-3xl mx-auto">
-          One API to rule them all. Access multiple AI providers through a single, unified interface.
-        </p>
-      </div>
-
-      {/* Quick Start */}
-      <motion.section
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl border border-gray-700"
-      >
-        <h2 className="text-2xl font-bold text-white mb-6">Quick Start</h2>
-        <div className="grid lg:grid-cols-2 gap-8">
-          <div>
-            <h3 className="text-lg font-semibold text-white mb-4">1. Get Your API Key</h3>
-            <p className="text-gray-400 mb-4">
-              After logging in, navigate to the API Management section to generate your unique API key.
-            </p>
-            
-            <h3 className="text-lg font-semibold text-white mb-4 mt-6">2. Make Your First Request</h3>
-            <p className="text-gray-400 mb-4">
-              Use our unified API to access any of the supported AI models with a simple HTTP request.
-            </p>
-          </div>
-          
-          <div className="bg-gray-900 p-4 rounded-lg border border-gray-600">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-gray-400">JavaScript Example</span>
-              <button className="text-gray-400 hover:text-white text-sm">📋 Copy</button>
-            </div>
-            <pre className="text-sm text-green-400 overflow-x-auto">
-              <code>{codeExample}</code>
-            </pre>
-          </div>
+    <div className="h-full flex flex-col p-6">
+      <div className="max-w-6xl mx-auto w-full flex-1 overflow-y-auto space-y-8">
+        <div className="text-center">
+          <h1 className="text-4xl font-bold text-white mb-4">
+            AI Router <span className="bg-gradient-to-r from-purple-500 to-blue-400 text-transparent bg-clip-text">Documentation</span>
+          </h1>
+          <p className="text-xl text-gray-400 max-w-3xl mx-auto">
+            One API to rule them all. Access multiple AI providers through a single, unified interface.
+          </p>
         </div>
-      </motion.section>
 
-      {/* Features */}
-      <section>
-        <h2 className="text-3xl font-bold text-white text-center mb-12">Key Features</h2>
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Quick Start */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl border border-gray-700"
+        >
+          <h2 className="text-2xl font-bold text-white mb-6">Quick Start</h2>
+          <div className="grid lg:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-2">1. Get Your API Key</h3>
+                <p className="text-gray-400 text-sm">
+                  After logging in, navigate to the API Management section to generate your unique API key.
+                </p>
+              </div>
+              
+              <div>
+                <h3 className="text-lg font-semibold text-white mb-2">2. Make Your First Request</h3>
+                <p className="text-gray-400 text-sm">
+                  Use our unified API to access any of the supported AI models with a simple HTTP request.
+                </p>
+              </div>
+            </div>
+            
+            <div className="bg-gray-900 p-4 rounded-lg border border-gray-600 min-w-0">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm text-gray-400">JavaScript Example</span>
+                <button className="text-gray-400 hover:text-white text-sm flex-shrink-0">📋 Copy</button>
+              </div>
+              <div className="overflow-x-auto">
+                <pre className="text-xs text-green-400 whitespace-pre">
+                  <code>{codeExample}</code>
+                </pre>
+              </div>
+            </div>
+          </div>
+        </motion.section>
+
+        {/* Features */}
+        <section>
+          <h2 className="text-3xl font-bold text-white text-center mb-8">Key Features</h2>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
           {features.map((feature, index) => (
             <motion.div
               key={feature.title}
@@ -144,16 +151,16 @@ console.log(data.choices[0].message.content);`;
             </motion.div>
           ))}
         </div>
-      </section>
+        </section>
 
-      {/* Supported Models */}
-      <motion.section
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-br from-gray-800 to-gray-900 p-8 rounded-2xl border border-gray-700"
-      >
-        <h2 className="text-2xl font-bold text-white mb-6 text-center">Supported Models</h2>
-        <div className="grid md:grid-cols-3 gap-6">
+        {/* Supported Models */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl border border-gray-700"
+        >
+          <h2 className="text-2xl font-bold text-white mb-6 text-center">Supported Models</h2>
+          <div className="grid md:grid-cols-3 gap-6">
           <div>
             <h3 className="text-lg font-semibold text-white mb-3 flex items-center">
               <span className="mr-2">🤖</span> Text Generation
@@ -244,7 +251,8 @@ console.log(data.choices[0].message.content);`;
             View Full Documentation
           </button>
         </div>
-      </motion.section>
+        </motion.section>
+      </div>
     </div>
   );
 };

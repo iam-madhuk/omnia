@@ -127,35 +127,36 @@ export const APIManagement = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6">
-      <div className="text-center mb-8">
-        <h1 className="text-4xl font-bold text-white mb-2">
-          API <span className="bg-gradient-to-r from-purple-500 to-blue-400 text-transparent bg-clip-text">Management</span>
-        </h1>
-        <p className="text-gray-400">Manage your API keys and provider connections</p>
-      </div>
+    <div className="h-full flex flex-col p-6">
+      <div className="max-w-6xl mx-auto w-full flex-1 overflow-y-auto space-y-6">
+        <div className="text-center mb-8">
+          <h1 className="text-4xl font-bold text-white mb-2">
+            API <span className="bg-gradient-to-r from-purple-500 to-blue-400 text-transparent bg-clip-text">Management</span>
+          </h1>
+          <p className="text-gray-400">Manage your API keys and provider connections</p>
+        </div>
 
-      {/* Tab Navigation */}
-      <div className="flex flex-wrap gap-4 mb-8 justify-center">
-        {[
-          { id: 'keys', label: 'API Keys', icon: '🔑' },
-          { id: 'providers', label: 'Providers', icon: '🔌' },
-          { id: 'usage', label: 'Usage Stats', icon: '📊' }
-        ].map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => setActiveTab(tab.id as any)}
-            className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-semibold transition-all ${
-              activeTab === tab.id
-                ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
-                : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50'
-            }`}
-          >
-            <span>{tab.icon}</span>
-            <span>{tab.label}</span>
-          </button>
-        ))}
-      </div>
+        {/* Tab Navigation */}
+        <div className="flex flex-wrap gap-4 mb-6 justify-center">
+          {[
+            { id: 'keys', label: 'API Keys', icon: '🔑' },
+            { id: 'providers', label: 'Providers', icon: '🔌' },
+            { id: 'usage', label: 'Usage Stats', icon: '📊' }
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id as any)}
+              className={`flex items-center space-x-2 px-6 py-3 rounded-lg font-semibold transition-all ${
+                activeTab === tab.id
+                  ? 'bg-gradient-to-r from-purple-500 to-blue-500 text-white'
+                  : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50'
+              }`}
+            >
+              <span>{tab.icon}</span>
+              <span>{tab.label}</span>
+            </button>
+          ))}
+        </div>
 
       {/* API Keys Tab */}
       {activeTab === 'keys' && (
@@ -203,44 +204,45 @@ export const APIManagement = () => {
           )}
 
           {/* API Keys List */}
-          <div className="grid gap-4">
+          <div className="space-y-4">
             {apiKeys.map((apiKey) => (
-              <div key={apiKey.id} className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl border border-gray-700">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="text-lg font-semibold text-white">{apiKey.name}</h3>
-                    <div className="flex items-center space-x-4 mt-2 text-sm text-gray-400">
+              <div key={apiKey.id} className="bg-gradient-to-br from-gray-800 to-gray-900 p-4 rounded-2xl border border-gray-700">
+                <div className="flex justify-between items-start mb-3">
+                  <div className="flex-1 min-w-0 pr-4">
+                    <h3 className="text-lg font-semibold text-white mb-1">{apiKey.name}</h3>
+                    <div className="flex items-center space-x-4 text-sm text-gray-400 flex-wrap gap-y-1">
                       <span>Created: {apiKey.createdAt.toLocaleDateString()}</span>
                       {apiKey.lastUsed && <span>Last used: {apiKey.lastUsed.toLocaleDateString()}</span>}
                       <span>{apiKey.requests.toLocaleString()} requests</span>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <span className={`px-2 py-1 rounded-full text-xs ${
+                  <div className="flex items-center space-x-2 flex-shrink-0">
+                    <span className={`px-2 py-1 rounded-full text-xs whitespace-nowrap ${
                       apiKey.status === 'active' ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'
                     }`}>
                       {apiKey.status}
                     </span>
                     <button
                       onClick={() => toggleKeyStatus(apiKey.id)}
-                      className="text-gray-400 hover:text-white"
+                      className="text-gray-400 hover:text-white p-1"
                     >
                       {apiKey.status === 'active' ? '⏸️' : '▶️'}
                     </button>
                     <button
                       onClick={() => deleteKey(apiKey.id)}
-                      className="text-red-400 hover:text-red-300"
+                      className="text-red-400 hover:text-red-300 p-1"
                     >
                       🗑️
                     </button>
                   </div>
                 </div>
                 <div className="bg-gray-700/50 p-3 rounded-lg">
-                  <div className="flex justify-between items-center">
-                    <code className="text-sm font-mono text-purple-300">{apiKey.key}</code>
+                  <div className="flex items-center min-w-0">
+                    <code className="text-sm font-mono text-purple-300 flex-1 truncate pr-2 select-all">{apiKey.key}</code>
                     <button
                       onClick={() => navigator.clipboard.writeText(apiKey.key)}
-                      className="text-gray-400 hover:text-white ml-2"
+                      className="text-gray-400 hover:text-white flex-shrink-0 p-1"
+                      title="Copy to clipboard"
                     >
                       📋
                     </button>
@@ -368,6 +370,7 @@ export const APIManagement = () => {
           </div>
         </motion.div>
       )}
+      </div>
     </div>
   );
 };

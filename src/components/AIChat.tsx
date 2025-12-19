@@ -172,9 +172,9 @@ export const AIChat = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="h-full flex flex-col p-6">
       {/* Header */}
-      <div className="text-center">
+      <div className="text-center mb-6">
         <h1 className="text-4xl font-bold text-white mb-2">
           AI Router <span className="bg-gradient-to-r from-purple-500 to-blue-400 text-transparent bg-clip-text">Hub</span>
         </h1>
@@ -182,7 +182,7 @@ export const AIChat = () => {
       </div>
 
       {/* Usage Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-4 rounded-xl border border-gray-700">
           <div className="text-sm text-gray-400 mb-1">Requests</div>
           <div className="text-2xl font-bold text-white">{apiUsage.totalRequests}</div>
@@ -201,52 +201,56 @@ export const AIChat = () => {
         </div>
       </div>
 
-      <div className="grid lg:grid-cols-4 gap-6">
+      <div className="flex-1 flex gap-6 min-h-0">
         {/* Model Selection Sidebar */}
-        <div className="lg:col-span-1">
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-6 rounded-2xl border border-gray-700">
-            <h2 className="text-xl font-bold text-white mb-4">Select AI Model</h2>
-            <div className="space-y-3">
-              {availableModels.map((model) => (
-                <motion.button
-                  key={model.id}
-                  onClick={() => setSelectedModel(model)}
-                  className={`w-full text-left p-3 rounded-lg transition-all ${
-                    selectedModel.id === model.id
-                      ? 'bg-gradient-to-r from-purple-500 to-blue-500'
-                      : 'bg-gray-700/50 hover:bg-gray-600/50'
-                  }`}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <div className="flex items-center space-x-3">
-                    <span className="text-2xl">{model.icon}</span>
-                    <div className="flex-1">
-                      <div className="font-semibold text-white text-sm">{model.name}</div>
-                      <div className="text-xs text-gray-300">{model.provider}</div>
-                      <div className="text-xs text-gray-400">${model.costPer1K}/1K tokens</div>
+        <div className="w-80 flex-shrink-0">
+          <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-4 rounded-2xl border border-gray-700 h-full flex flex-col">
+            <h2 className="text-lg font-bold text-white mb-3">Select AI Model</h2>
+            <div className="flex-1 overflow-y-auto pr-2">
+              <div className="space-y-2 mb-4">
+                {availableModels.map((model) => (
+                  <motion.button
+                    key={model.id}
+                    onClick={() => setSelectedModel(model)}
+                    className={`w-full text-left p-3 rounded-lg transition-all ${
+                      selectedModel.id === model.id
+                        ? 'bg-gradient-to-r from-purple-500 to-blue-500'
+                        : 'bg-gray-700/50 hover:bg-gray-600/50'
+                    }`}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <span className="text-xl flex-shrink-0">{model.icon}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-white text-sm truncate">{model.name}</div>
+                        <div className="text-xs text-gray-300 truncate">{model.provider}</div>
+                        <div className="text-xs text-gray-400">${model.costPer1K}/1K tokens</div>
+                      </div>
                     </div>
-                  </div>
-                </motion.button>
-              ))}
+                  </motion.button>
+                ))}
+              </div>
             </div>
 
             {/* Selected Model Details */}
-            <div className="mt-6 p-4 bg-gray-700/30 rounded-lg">
-              <h3 className="font-semibold text-white mb-2">{selectedModel.name}</h3>
-              <p className="text-sm text-gray-400 mb-3">{selectedModel.description}</p>
-              <div className="space-y-1 text-xs">
-                <div className="text-gray-400">Max Tokens: {selectedModel.maxTokens.toLocaleString()}</div>
-                <div className="text-gray-400">Category: {selectedModel.category}</div>
-              </div>
-              <div className="mt-2">
-                <div className="text-xs text-gray-400 mb-1">Capabilities:</div>
-                <div className="flex flex-wrap gap-1">
-                  {selectedModel.capabilities.map((cap) => (
-                    <span key={cap} className="bg-purple-500/20 text-purple-300 px-2 py-1 rounded text-xs">
-                      {cap}
-                    </span>
-                  ))}
+            <div className="mt-auto pt-4 border-t border-gray-700">
+              <div className="p-3 bg-gray-700/30 rounded-lg">
+                <h3 className="font-semibold text-white mb-2 text-sm">{selectedModel.name}</h3>
+                <p className="text-xs text-gray-400 mb-2 line-clamp-2">{selectedModel.description}</p>
+                <div className="space-y-1 text-xs mb-2">
+                  <div className="text-gray-400">Max Tokens: {selectedModel.maxTokens.toLocaleString()}</div>
+                  <div className="text-gray-400">Category: {selectedModel.category}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-gray-400 mb-1">Capabilities:</div>
+                  <div className="flex flex-wrap gap-1">
+                    {selectedModel.capabilities.map((cap) => (
+                      <span key={cap} className="bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded text-xs">
+                        {cap}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -254,10 +258,10 @@ export const AIChat = () => {
         </div>
 
         {/* Chat Interface */}
-        <div className="lg:col-span-3">
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl border border-gray-700 h-[600px] flex flex-col">
+        <div className="flex-1 min-w-0">
+          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl border border-gray-700 h-full flex flex-col">
             {/* Chat Header */}
-            <div className="p-4 border-b border-gray-700">
+            <div className="p-3 border-b border-gray-700 flex-shrink-0">
               <div className="flex items-center space-x-3">
                 <span className="text-2xl">{selectedModel.icon}</span>
                 <div>
@@ -268,7 +272,7 @@ export const AIChat = () => {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 p-4 overflow-y-auto space-y-4">
+            <div className="flex-1 p-4 overflow-y-auto space-y-4 min-h-0">
               {messages.length === 0 ? (
                 <div className="text-center text-gray-400 mt-20">
                   <div className="text-4xl mb-4">{selectedModel.icon}</div>
