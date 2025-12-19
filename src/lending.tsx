@@ -47,7 +47,7 @@ const Counter = ({ target, duration = 2 }: CounterProps) => {
 
 const AILandingPage = () => {
   // Auth context
-  const { isAuthenticated, setShowLogin, user } = useAuth();
+  const { isAuthenticated, setShowLogin } = useAuth();
   
   // Navigation state
   const [currentView, setCurrentView] = useState<'landing' | 'dashboard' | 'profile'>('landing');
@@ -78,9 +78,9 @@ const AILandingPage = () => {
 
   // Reset navigation when authentication changes
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && currentView !== 'landing' && currentView !== 'profile') {
       setCurrentView('dashboard');
-    } else {
+    } else if (!isAuthenticated) {
       setCurrentView('landing');
     }
   }, [isAuthenticated]);
@@ -91,13 +91,18 @@ const AILandingPage = () => {
     const handleNavigateToDashboard = () => {
       setCurrentView('dashboard');
     };
+    const handleNavigateToLanding = () => {
+      setCurrentView('landing');
+    };
     
     window.addEventListener('navigate-to-profile', handleNavigateToProfile);
     window.addEventListener('navigate-to-dashboard', handleNavigateToDashboard);
+    window.addEventListener('navigate-to-landing', handleNavigateToLanding);
     
     return () => {
       window.removeEventListener('navigate-to-profile', handleNavigateToProfile);
       window.removeEventListener('navigate-to-dashboard', handleNavigateToDashboard);
+      window.removeEventListener('navigate-to-landing', handleNavigateToLanding);
     };
   }, []);
 
@@ -153,43 +158,43 @@ const AILandingPage = () => {
   }, [testimonials.length]);
 
   // Hover tilt effect for cards
-  const useTilt = (active: boolean) => {
-    const ref = useRef<HTMLDivElement>(null);
+  // const useTilt = (active: boolean) => {
+  //   const ref = useRef<HTMLDivElement>(null);
 
-    useEffect(() => {
-      if (!ref.current || !active) return;
+  //   useEffect(() => {
+  //     if (!ref.current || !active) return;
 
-      const element = ref.current;
+  //     const element = ref.current;
 
-      const handleMouseMove = (e: MouseEvent) => {
-        const rect = element.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const y = e.clientY - rect.top;
+  //     const handleMouseMove = (e: MouseEvent) => {
+  //       const rect = element.getBoundingClientRect();
+  //       const x = e.clientX - rect.left;
+  //       const y = e.clientY - rect.top;
 
-        const xPercentage = x / rect.width;
-        const yPercentage = y / rect.height;
+  //       const xPercentage = x / rect.width;
+  //       const yPercentage = y / rect.height;
 
-        const xRotation = (yPercentage - 0.5) * 10;
-        const yRotation = (0.5 - xPercentage) * 10;
+  //       const xRotation = (yPercentage - 0.5) * 10;
+  //       const yRotation = (0.5 - xPercentage) * 10;
 
-        element.style.transform = `perspective(1000px) rotateX(${xRotation}deg) rotateY(${yRotation}deg) scale3d(1.02, 1.02, 1.02)`;
-      };
+  //       element.style.transform = `perspective(1000px) rotateX(${xRotation}deg) rotateY(${yRotation}deg) scale3d(1.02, 1.02, 1.02)`;
+  //     };
 
-      const handleMouseLeave = () => {
-        element.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
-      };
+  //     const handleMouseLeave = () => {
+  //       element.style.transform = 'perspective(1000px) rotateX(0) rotateY(0)';
+  //     };
 
-      element.addEventListener('mousemove', handleMouseMove as EventListener);
-      element.addEventListener('mouseleave', handleMouseLeave);
+  //     element.addEventListener('mousemove', handleMouseMove as EventListener);
+  //     element.addEventListener('mouseleave', handleMouseLeave);
 
-      return () => {
-        element.removeEventListener('mousemove', handleMouseMove as EventListener);
-        element.removeEventListener('mouseleave', handleMouseLeave);
-      };
-    }, [active]);
+  //     return () => {
+  //       element.removeEventListener('mousemove', handleMouseMove as EventListener);
+  //       element.removeEventListener('mouseleave', handleMouseLeave);
+  //     };
+  //   }, [active]);
 
-    return ref;
-  };
+  //   return ref;
+  // };
 
   // Handle different views based on navigation - MOVED TO END TO FIX HOOKS ISSUE
   if (isAuthenticated && currentView === 'dashboard') {
@@ -221,16 +226,15 @@ const AILandingPage = () => {
             >
               Dashboard
             </button>
-            <UserProfile onNavigate={handleNavigation} />
           </div>
         </motion.nav>
-        <div className="pt-20">
-          <ProfileSettings />
-        </div>
+        <ProfileSettings />
       </div>
     );
   }
 
+  // If authenticated user explicitly navigates to landing, show landing page
+  // This allows authenticated users to view the landing page
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-indigo-900 to-black text-white overflow-hidden relative scroll-smooth">
@@ -539,9 +543,6 @@ const AILandingPage = () => {
           ))}
         </div>
       </section>
-
-      {/* Dashboard Section - Only show if authenticated */}
-      {isAuthenticated && <div id="dashboard"><Dashboard /></div>}
 
       {/* Features Section */}
       <section id="features" className="py-24 px-12 bg-[#0a0f1c] relative">

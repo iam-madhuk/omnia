@@ -9,7 +9,12 @@ export const Dashboard = () => {
   const { user, logout } = useAuth();
   const [currentView, setCurrentView] = useState<'dashboard' | 'chat' | 'api' | 'docs' | 'content-generator' | 'code-assistant' | 'data-analysis' | 'image-creator' | 'translation'>('dashboard');
 
-  console.log('Dashboard currentView:', currentView); // Debug log
+  const handleViewChange = (newView: typeof currentView) => {
+    if (newView !== currentView) {
+      console.log('Changing view from', currentView, 'to', newView);
+      setCurrentView(newView);
+    }
+  };
 
   if (!user) return null;
 
@@ -21,17 +26,10 @@ export const Dashboard = () => {
           <div className="p-4 border-b border-gray-700">
             <button
               onClick={() => setCurrentView('dashboard')}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors text-white mb-2"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors text-white"
             >
               <span>←</span>
               <span>Back to Dashboard</span>
-            </button>
-            <button
-              onClick={logout}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-red-600 hover:bg-red-700 transition-colors text-white"
-            >
-              <span>🏠</span>
-              <span>Home</span>
             </button>
           </div>
         </div>
@@ -84,17 +82,10 @@ export const Dashboard = () => {
           <div className="p-4 border-b border-gray-700">
             <button
               onClick={() => setCurrentView('dashboard')}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors text-white mb-2"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors text-white"
             >
               <span>←</span>
               <span>Back to Dashboard</span>
-            </button>
-            <button
-              onClick={logout}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-red-600 hover:bg-red-700 transition-colors text-white"
-            >
-              <span>🏠</span>
-              <span>Home</span>
             </button>
           </div>
         </div>
@@ -166,17 +157,10 @@ export const Dashboard = () => {
           <div className="p-4 border-b border-gray-700">
             <button
               onClick={() => setCurrentView('dashboard')}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors text-white mb-2"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors text-white"
             >
               <span>←</span>
               <span>Back to Dashboard</span>
-            </button>
-            <button
-              onClick={logout}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-red-600 hover:bg-red-700 transition-colors text-white"
-            >
-              <span>🏠</span>
-              <span>Home</span>
             </button>
           </div>
           <div className="flex-1 overflow-y-auto p-4">
@@ -207,17 +191,10 @@ export const Dashboard = () => {
           <div className="p-4 border-b border-gray-700">
             <button
               onClick={() => setCurrentView('dashboard')}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors text-white mb-2"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors text-white"
             >
               <span>←</span>
               <span>Back to Dashboard</span>
-            </button>
-            <button
-              onClick={logout}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-red-600 hover:bg-red-700 transition-colors text-white"
-            >
-              <span>🏠</span>
-              <span>Home</span>
             </button>
           </div>
         </div>
@@ -238,17 +215,10 @@ export const Dashboard = () => {
           <div className="p-4 border-b border-gray-700">
             <button
               onClick={() => setCurrentView('dashboard')}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors text-white mb-2"
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 transition-colors text-white"
             >
               <span>←</span>
               <span>Back to Dashboard</span>
-            </button>
-            <button
-              onClick={logout}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg bg-red-600 hover:bg-red-700 transition-colors text-white"
-            >
-              <span>🏠</span>
-              <span>Home</span>
             </button>
           </div>
         </div>
@@ -329,7 +299,7 @@ export const Dashboard = () => {
         {/* New Chat Button */}
         <div className="p-4">
           <button
-            onClick={() => setCurrentView('chat')}
+            onClick={() => handleViewChange('chat')}
             className="w-full flex items-center gap-3 px-4 py-3 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 transition-colors text-white font-medium"
           >
             <span>💬</span>
@@ -343,57 +313,27 @@ export const Dashboard = () => {
             <div className="text-xs text-gray-400 font-medium px-3 py-2">NAVIGATION</div>
             
             <button
-              onClick={logout}
+              onClick={() => {
+                console.log('Navigate to Landing clicked');
+                // Dispatch custom event to navigate to landing page
+                const event = new CustomEvent('navigate-to-landing');
+                window.dispatchEvent(event);
+              }}
               className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors text-gray-300"
             >
               <span>🏠</span>
-              <span>Home</span>
-            </button>
-            
-            <div className="text-xs text-gray-400 font-medium px-3 py-2 pt-4">WORKSPACE</div>
-            
-            <button
-              onClick={() => setCurrentView('chat')}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors text-gray-300"
-            >
-              <span>🤖</span>
-              <span>AI Chat</span>
-            </button>
-            
-            <button
-              onClick={() => setCurrentView('api')}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors text-gray-300"
-            >
-              <span>⚙️</span>
-              <span>API Management</span>
-            </button>
-            
-            <button
-              onClick={() => setCurrentView('docs')}
-              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors text-gray-300"
-            >
-              <span>📚</span>
-              <span>Documentation</span>
+              <span>Landing Page</span>
             </button>
 
-            <div className="text-xs text-gray-400 font-medium px-3 py-2 pt-4">RECENT PROJECTS</div>
+            <div className="text-xs text-gray-400 font-medium px-3 py-2 pt-4">QUICK ACCESS</div>
             
-            {[
-              { name: 'Content Generator', icon: '✍️', view: 'content-generator' },
-              { name: 'Code Assistant', icon: '💻', view: 'code-assistant' },
-              { name: 'Data Analysis', icon: '📊', view: 'data-analysis' },
-              { name: 'Image Creator', icon: '🎨', view: 'image-creator' },
-              { name: 'Translation Bot', icon: '🌐', view: 'translation' }
-            ].map((project, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentView(project.view as any)}
-                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors text-gray-300 text-sm"
-              >
-                <span>{project.icon}</span>
-                <span>{project.name}</span>
-              </button>
-            ))}
+            <button
+              onClick={() => handleViewChange('chat')}
+              className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-800 transition-colors text-gray-300"
+            >
+              <span>💬</span>
+              <span>Start New Chat</span>
+            </button>
           </div>
         </div>
 
@@ -414,10 +354,18 @@ export const Dashboard = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
         {/* Main Dashboard Content */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto main-dashboard-content">
           <div className="max-w-6xl mx-auto p-8">
             {/* Welcome Header */}
-            <div className="text-center mb-8">
+            <div className="relative text-center mb-8">
+              <button
+                onClick={logout}
+                className="absolute top-0 right-0 px-4 py-2 bg-gray-800/80 hover:bg-gray-700/90 rounded-lg transition-colors text-gray-300 hover:text-white flex items-center gap-2 border border-gray-700"
+                title="Sign Out"
+              >
+                <span>↗</span>
+                <span>Sign Out</span>
+              </button>
               <h1 className="text-4xl font-bold text-white mb-4">
                 What's on the agenda today?
               </h1>
@@ -427,92 +375,111 @@ export const Dashboard = () => {
             </div>
 
             {/* Quick Actions Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
               {[
                 {
                   title: 'Generate Content',
                   description: 'Create articles, blogs, and marketing copy',
                   icon: '✍️',
                   color: 'from-blue-500 to-cyan-500',
-                  action: () => setCurrentView('content-generator')
+                  action: () => handleViewChange('content-generator')
                 },
                 {
                   title: 'Code Assistant',
                   description: 'Debug, review, and optimize your code',
                   icon: '💻',
                   color: 'from-purple-500 to-pink-500',
-                  action: () => setCurrentView('code-assistant')
+                  action: () => handleViewChange('code-assistant')
                 },
                 {
                   title: 'Data Analysis',
                   description: 'Analyze datasets and generate insights',
                   icon: '📊',
                   color: 'from-green-500 to-emerald-500',
-                  action: () => setCurrentView('data-analysis')
+                  action: () => handleViewChange('data-analysis')
                 },
                 {
                   title: 'Image Creation',
                   description: 'Generate AI-powered visual content',
                   icon: '🎨',
                   color: 'from-orange-500 to-red-500',
-                  action: () => setCurrentView('image-creator')
+                  action: () => handleViewChange('image-creator')
                 },
                 {
                   title: 'API Management',
                   description: 'Manage your API keys and usage',
                   icon: '⚙️',
                   color: 'from-indigo-500 to-purple-500',
-                  action: () => setCurrentView('api')
+                  action: () => handleViewChange('api')
                 },
                 {
                   title: 'Documentation',
                   description: 'Learn how to integrate our APIs',
                   icon: '📚',
                   color: 'from-teal-500 to-blue-500',
-                  action: () => setCurrentView('docs')
+                  action: () => handleViewChange('docs')
                 }
               ].map((item, i) => (
                 <motion.button
                   key={i}
                   onClick={item.action}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="p-6 bg-gray-900/50 rounded-2xl border border-gray-700 hover:border-gray-600 transition-all duration-300 text-left group"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="p-4 bg-gray-900/50 rounded-xl border border-gray-700 hover:border-gray-500 transition-all duration-300 text-center group hover:bg-gray-800/50"
                 >
-                  <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${item.color} flex items-center justify-center text-2xl mb-4`}>
+                  <div className={`w-8 h-8 rounded-lg bg-gradient-to-r ${item.color} flex items-center justify-center text-lg mb-2 mx-auto`}>
                     {item.icon}
                   </div>
-                  <h3 className="text-xl font-semibold text-white mb-2 group-hover:text-blue-400 transition-colors">
+                  <h3 className="text-sm font-semibold text-white mb-1 group-hover:text-blue-400 transition-colors leading-tight">
                     {item.title}
                   </h3>
-                  <p className="text-gray-400 text-sm">
+                  <p className="text-gray-400 text-xs leading-tight hidden lg:block">
                     {item.description}
                   </p>
                 </motion.button>
               ))}
             </div>
 
-            {/* Stats Section */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Compact Stats Row */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
               {[
-                { label: 'AI Models', value: '15+', icon: '🤖' },
-                { label: 'Requests Today', value: '1,247', icon: '📈' },
-                { label: 'Active Projects', value: '8', icon: '📁' },
-                { label: 'Credits Left', value: '892', icon: '💳' }
+                { label: 'AI Models', value: '15+', icon: '🤖', color: 'from-blue-500 to-purple-500' },
+                { label: 'Requests Today', value: '1,247', icon: '📈', color: 'from-green-500 to-blue-500' },
+                { label: 'Active Projects', value: '8', icon: '📁', color: 'from-orange-500 to-red-500' },
+                { label: 'Credits Left', value: '892', icon: '💳', color: 'from-purple-500 to-pink-500' }
               ].map((stat, i) => (
                 <div
                   key={i}
-                  className="p-6 bg-gray-900/30 rounded-xl border border-gray-700"
+                  className="p-4 bg-gray-900/30 rounded-xl border border-gray-700 hover:border-gray-600 transition-all duration-300"
                 >
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-2xl font-bold text-white">{stat.value}</div>
-                      <div className="text-sm text-gray-400">{stat.label}</div>
+                      <div className="text-xl font-bold text-white">{stat.value}</div>
+                      <div className="text-xs text-gray-400">{stat.label}</div>
                     </div>
-                    <div className="text-2xl opacity-50">{stat.icon}</div>
+                    <div className={`w-8 h-8 rounded-lg bg-gradient-to-r ${stat.color} flex items-center justify-center text-sm`}>
+                      {stat.icon}
+                    </div>
                   </div>
                 </div>
               ))}
+            </div>
+
+            {/* Quick Access Feature */}
+            <div className="bg-gradient-to-r from-gray-900/50 to-gray-800/50 rounded-2xl border border-gray-700 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-xl font-bold text-white mb-2">Ready to create something amazing?</h3>
+                  <p className="text-gray-400 text-sm">Start with our most popular AI assistant</p>
+                </div>
+                <button
+                  onClick={() => handleViewChange('chat')}
+                  className="px-6 py-3 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 rounded-xl text-white font-medium transition-all duration-300 flex items-center gap-2"
+                >
+                  <span>💬</span>
+                  <span>Start Chat</span>
+                </button>
+              </div>
             </div>
           </div>
         </div>
