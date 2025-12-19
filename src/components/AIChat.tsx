@@ -201,13 +201,15 @@ export const AIChat = () => {
         </div>
       </div>
 
-      <div className="flex-1 flex gap-6 min-h-0">
+      <div className="flex-1 flex gap-4 min-h-0">
         {/* Model Selection Sidebar */}
-        <div className="w-80 flex-shrink-0">
-          <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-4 rounded-2xl border border-gray-700 h-full flex flex-col">
-            <h2 className="text-lg font-bold text-white mb-3">Select AI Model</h2>
-            <div className="flex-1 overflow-y-auto pr-2">
-              <div className="space-y-2 mb-4">
+        <div className="w-56 flex-shrink-0">
+          <div className="bg-gradient-to-br from-gray-800 to-gray-900 p-2 rounded-xl border border-gray-700 h-full flex flex-col overflow-hidden">
+            <h2 className="text-sm font-bold text-white mb-2">AI Models</h2>
+            
+            {/* Model List */}
+            <div className="flex-1 min-h-0 overflow-y-auto pr-2 mb-4">
+              <div className="space-y-2">
                 {availableModels.map((model) => (
                   <motion.button
                     key={model.id}
@@ -233,27 +235,6 @@ export const AIChat = () => {
               </div>
             </div>
 
-            {/* Selected Model Details */}
-            <div className="mt-auto pt-4 border-t border-gray-700">
-              <div className="p-3 bg-gray-700/30 rounded-lg">
-                <h3 className="font-semibold text-white mb-2 text-sm">{selectedModel.name}</h3>
-                <p className="text-xs text-gray-400 mb-2 line-clamp-2">{selectedModel.description}</p>
-                <div className="space-y-1 text-xs mb-2">
-                  <div className="text-gray-400">Max Tokens: {selectedModel.maxTokens.toLocaleString()}</div>
-                  <div className="text-gray-400">Category: {selectedModel.category}</div>
-                </div>
-                <div>
-                  <div className="text-xs text-gray-400 mb-1">Capabilities:</div>
-                  <div className="flex flex-wrap gap-1">
-                    {selectedModel.capabilities.map((cap) => (
-                      <span key={cap} className="bg-purple-500/20 text-purple-300 px-1.5 py-0.5 rounded text-xs">
-                        {cap}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
           </div>
         </div>
 
