@@ -167,7 +167,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 **Madhu Kumari**
 - GitHub: [@iam-madhuk](https://github.com/iam-madhuk)
-- Email: madhu.kumari@nagarro.com
 
 ## 🙏 Acknowledgments
 
